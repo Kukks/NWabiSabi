@@ -54,13 +54,19 @@ public class CredentialIssuer
 	/// </summary>
 	/// <param name="credentialIssuerSecretKey">The <see cref="CredentialIssuerSecretKey">coordinator's secret key</see> used to issue the credentials.</param>
 	/// <param name="randomNumberGenerator">The random number generator.</param>
+	/// <param name="maxAmount">The maximum credential amount value.</param>
+	/// <param name="numberOfCredentials">Number of credentials presented/requested per registration (k in the WabiSabi paper). Must be at least 1.</param>
 	public CredentialIssuer(
 		CredentialIssuerSecretKey credentialIssuerSecretKey,
 		WasabiRandom randomNumberGenerator,
-		long maxAmount)
+		long maxAmount,
+		int numberOfCredentials = ProtocolConstants.CredentialNumber)
 	{
+		if (numberOfCredentials < 1)
+			throw new ArgumentOutOfRangeException(nameof(numberOfCredentials), "Must be at least 1.");
 		MaxAmount = maxAmount;
 		RangeProofWidth = (int)Math.Ceiling(Math.Log2(MaxAmount));
+		NumberOfCredentials = numberOfCredentials;
 		CredentialIssuerSecretKey = Guard.NotNull(nameof(credentialIssuerSecretKey), credentialIssuerSecretKey);
 		CredentialIssuerParameters = CredentialIssuerSecretKey.ComputeCredentialIssuerParameters();
 		RandomNumberGenerator = Guard.NotNull(nameof(randomNumberGenerator), randomNumberGenerator);
@@ -85,10 +91,10 @@ public class CredentialIssuer
 	private CredentialIssuerParameters CredentialIssuerParameters { get; }
 
 	/// <summary>
-	/// Gets the number of credentials that have to be requested/presented
+	/// Gets the number of credentials that have to be requested/presented.
 	/// This parameter is called `k` in the WabiSabi paper.
 	/// </summary>
-	public int NumberOfCredentials => ProtocolConstants.CredentialNumber;
+	public int NumberOfCredentials { get; }
 
 	/// <summary>
 	/// Process the <see cref="ICredentialsRequest">credentials registration requests</see> and

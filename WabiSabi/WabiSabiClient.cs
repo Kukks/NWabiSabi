@@ -19,19 +19,24 @@ using CredentialRequesting;
 /// </summary>
 public class WabiSabiClient
 {
+	/// <param name="numberOfCredentials">Number of credentials presented/requested per registration (k in the WabiSabi paper). Must be at least 1 and must match the issuer's value.</param>
 	public WabiSabiClient(
 		CredentialIssuerParameters credentialIssuerParameters,
 		WasabiRandom randomNumberGenerator,
-		long rangeProofUpperBound)
+		long rangeProofUpperBound,
+		int numberOfCredentials = ProtocolConstants.CredentialNumber)
 	{
+		if (numberOfCredentials < 1)
+			throw new ArgumentOutOfRangeException(nameof(numberOfCredentials), "Must be at least 1.");
 		RangeProofWidth = (int)Math.Ceiling(Math.Log2(rangeProofUpperBound));
+		NumberOfCredentials = numberOfCredentials;
 		RandomNumberGenerator = Guard.NotNull(nameof(randomNumberGenerator), randomNumberGenerator);
 		CredentialIssuerParameters = Guard.NotNull(nameof(credentialIssuerParameters), credentialIssuerParameters);
 	}
 
 	public int RangeProofWidth { get; }
 
-	public int NumberOfCredentials => ProtocolConstants.CredentialNumber;
+	public int NumberOfCredentials { get; }
 
 	private CredentialIssuerParameters CredentialIssuerParameters { get; }
 
