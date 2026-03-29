@@ -139,11 +139,20 @@ public class CredentialIssuer
 				$"{requiredNumberOfPresentations} credential presentations were expected but {presentedCount} were received.");
 		}
 
-		// Don't allow balance to go negative. In case this goes below zero
-		// then there is a problem somewhere because this should not be possible.
-		if (Balance + registrationRequest.Delta < 0)
+		// Atomically check and update the balance using compare-and-swap.
+		// This ensures concurrent requests cannot both pass the check.
 		{
-			throw new InvalidOperationException("Negative issuer balance");
+			long original, updated;
+			do
+			{
+				original = Interlocked.Read(ref _balance);
+				updated = original + registrationRequest.Delta;
+				if (updated < 0)
+				{
+					throw new InvalidOperationException("Negative issuer balance");
+				}
+			}
+			while (Interlocked.CompareExchange(ref _balance, updated, original) != original);
 		}
 
 		// Check that the range proofs are of the appropriate bitwidth
@@ -260,10 +269,7 @@ public class CredentialIssuer
 		// double spend attempt, and there is no point in allowing those
 		// serial numbers to be reused and the round to proceed.
 
-		if (Interlocked.Add(ref _balance, registrationRequest.Delta) < 0)
-		{
-			throw new InvalidOperationException("Negative balance");
-		}
+		// Balance was already atomically updated via CAS above.
 
 		// Issue the credentials and construct the response.
 		var credentials = requested.Select(x => IssueCredential(x.Ma, RandomNumberGenerator.GetScalar())).ToImmutableArray();

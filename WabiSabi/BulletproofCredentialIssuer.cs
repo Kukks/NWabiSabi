@@ -77,8 +77,18 @@ public class BulletproofCredentialIssuer
 				WabiSabiCryptoErrorCode.InvalidNumberOfPresentedCredentials,
 				$"{requiredNumberOfPresentations} credential presentations were expected but {presentedCount} were received.");
 
-		if (Balance + registrationRequest.Delta < 0)
-			throw new InvalidOperationException("Negative issuer balance");
+		// Atomically check and update the balance using compare-and-swap.
+		{
+			long original, updated;
+			do
+			{
+				original = Interlocked.Read(ref _balance);
+				updated = original + registrationRequest.Delta;
+				if (updated < 0)
+					throw new InvalidOperationException("Negative issuer balance");
+			}
+			while (Interlocked.CompareExchange(ref _balance, updated, original) != original);
+		}
 
 		// Verify BP++ range proofs if this is a bulletproof request
 		if (!isNullRequest && registrationRequest is BulletproofRealCredentialsRequest bpRequest)
@@ -162,8 +172,7 @@ public class BulletproofCredentialIssuer
 			}
 		}
 
-		if (Interlocked.Add(ref _balance, registrationRequest.Delta) < 0)
-			throw new InvalidOperationException("Negative balance");
+		// Balance was already atomically updated via CAS above.
 
 		var credentials = requested.Select(x => IssueCredential(x.Ma, RandomNumberGenerator.GetScalar())).ToImmutableArray();
 		var proofs = ProofSystem.Prove(transcript, credentials.Select(x => x.Knowledge), RandomNumberGenerator);
