@@ -43,7 +43,7 @@ using CredentialRequesting;
 /// used as a key, in this way using a standard solution it is possible to respond with the exact
 /// same valid credentials to the client without performance penalties.
 /// </remarks>
-public class CredentialIssuer
+public class CredentialIssuer : ICredentialIssuer
 {
 	// Canary test check to ensure credential balance is never negative.
 	// Accessed using Interlocked methods.

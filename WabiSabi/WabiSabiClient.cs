@@ -17,7 +17,7 @@ using CredentialRequesting;
 /// Provides the methods for creating <see cref="ICredentialsRequest">unified WabiSabi credential registration request messages</see>
 /// and for handling the <see cref="CredentialsResponse">credential registration responses</see> received from the coordinator.
 /// </summary>
-public class WabiSabiClient
+public class WabiSabiClient : ICredentialClient
 {
 	/// <param name="numberOfCredentials">Number of credentials presented/requested per registration (k in the WabiSabi paper). Must be at least 1 and must match the issuer's value.</param>
 	public WabiSabiClient(
@@ -222,6 +222,20 @@ public class WabiSabiClient
 
 		return credentials.Select(x => new Credential(x.Requested.Value, x.Requested.Randomness, x.Issued));
 	}
+
+	// Explicit interface implementations for ICredentialClient
+	ICredentialRequestData ICredentialClient.CreateRequestForZeroAmount() => CreateRequestForZeroAmount();
+
+	ICredentialRequestData ICredentialClient.CreateRequest(
+		IEnumerable<long> amountsToRequest,
+		IEnumerable<Credential> credentialsToPresent,
+		CancellationToken cancellationToken)
+		=> CreateRequest(amountsToRequest, credentialsToPresent, cancellationToken);
+
+	ICredentialRequestData ICredentialClient.CreateRequest(
+		IEnumerable<Credential> credentialsToPresent,
+		CancellationToken cancellationToken)
+		=> CreateRequest(credentialsToPresent, cancellationToken);
 
 	private Transcript BuildTranscript(bool isNullRequest)
 	{

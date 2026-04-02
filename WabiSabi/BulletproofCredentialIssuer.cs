@@ -20,7 +20,7 @@ using NBullet;
 /// Variant of <see cref="CredentialIssuer"/> that verifies Bulletproofs++ range proofs
 /// instead of sigma-protocol bit decomposition range proofs.
 /// </summary>
-public class BulletproofCredentialIssuer
+public class BulletproofCredentialIssuer : ICredentialIssuer
 {
 	private long _balance = 0;
 	private readonly BulletproofPlusPlusRangeProof _rangeProofSystem;

@@ -20,7 +20,7 @@ using NBullet;
 /// instead of sigma-protocol bit decomposition. All other proofs (show credential,
 /// balance, issuer parameter) remain as sigma protocols.
 /// </summary>
-public class BulletproofWabiSabiClient
+public class BulletproofWabiSabiClient : ICredentialClient
 {
 	private readonly BulletproofPlusPlusRangeProof _rangeProofSystem;
 
@@ -184,6 +184,20 @@ public class BulletproofWabiSabiClient
 		return credentials.Select(x => new Credential(x.Requested.Value, x.Requested.Randomness, x.Issued));
 	}
 
+	// Explicit interface implementations for ICredentialClient
+	ICredentialRequestData ICredentialClient.CreateRequestForZeroAmount() => CreateRequestForZeroAmount();
+
+	ICredentialRequestData ICredentialClient.CreateRequest(
+		IEnumerable<long> amountsToRequest,
+		IEnumerable<Credential> credentialsToPresent,
+		CancellationToken cancellationToken)
+		=> CreateRequest(amountsToRequest, credentialsToPresent, cancellationToken);
+
+	ICredentialRequestData ICredentialClient.CreateRequest(
+		IEnumerable<Credential> credentialsToPresent,
+		CancellationToken cancellationToken)
+		=> CreateRequest(credentialsToPresent, cancellationToken);
+
 	private Transcript BuildTranscript(bool isNullRequest)
 	{
 		var label = $"BulletproofUnifiedRegistration/{NumberOfCredentials}/{isNullRequest}";
@@ -227,4 +241,7 @@ public record BulletproofRealCredentialsRequest : ICredentialsRequest
 /// </summary>
 public record BulletproofRealCredentialsRequestData(
 	BulletproofRealCredentialsRequest CredentialsRequest,
-	CredentialsResponseValidation CredentialsResponseValidation);
+	CredentialsResponseValidation CredentialsResponseValidation) : ICredentialRequestData
+{
+	ICredentialsRequest ICredentialRequestData.CredentialsRequest => CredentialsRequest;
+}
