@@ -23,6 +23,8 @@ public record IssuanceRequest : IEquatable<IssuanceRequest>
 	/// </summary>
 	public IEnumerable<GroupElement> BitCommitments { get; }
 
+	public static IssuanceRequest FromComponents(GroupElement ma, IEnumerable<GroupElement> bitCommitments) => new(ma, bitCommitments);
+
 	public override int GetHashCode()
 	{
 		int hc = 0;

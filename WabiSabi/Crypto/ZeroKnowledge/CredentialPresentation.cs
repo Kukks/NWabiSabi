@@ -42,6 +42,8 @@ public record CredentialPresentation
 	/// </summary>
 	public GroupElement S { get; }
 
+	public static CredentialPresentation FromComponents(GroupElement ca, GroupElement cx0, GroupElement cx1, GroupElement cV, GroupElement s) => new(ca, cx0, cx1, cV, s);
+
 	/// <summary>
 	/// Computes the Z element.
 	/// </summary>

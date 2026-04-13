@@ -14,6 +14,8 @@ public record MAC
 
 	public Scalar T { get; }
 	public GroupElement V { get; }
+
+	public static MAC FromComponents(Scalar t, GroupElement v) => new(t, v);
 	internal GroupElement U => GenerateU(T);
 
 	public static MAC ComputeMAC(CredentialIssuerSecretKey sk, GroupElement ma, Scalar t)

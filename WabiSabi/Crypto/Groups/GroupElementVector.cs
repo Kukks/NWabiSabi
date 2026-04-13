@@ -16,6 +16,8 @@ public class GroupElementVector : IEnumerable<GroupElement>
 	{
 	}
 
+	public static GroupElementVector FromElements(IEnumerable<GroupElement> elements) => new(elements);
+
 	private IEnumerable<GroupElement> GroupElements { get; }
 
 	public IEnumerator<GroupElement> GetEnumerator() =>

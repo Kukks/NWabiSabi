@@ -20,6 +20,8 @@ public class ScalarVector : IEnumerable<Scalar>, IEquatable<ScalarVector>
 	{
 	}
 
+	public static ScalarVector FromScalars(IEnumerable<Scalar> scalars) => new(scalars);
+
 	private IEnumerable<Scalar> Scalars { get; }
 
 	public IEnumerator<Scalar> GetEnumerator() =>

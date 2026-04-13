@@ -18,6 +18,8 @@ public record Proof
 	public GroupElementVector PublicNonces { get; }
 	public ScalarVector Responses { get; }
 
+	public static Proof FromComponents(GroupElementVector publicNonces, ScalarVector responses) => new(publicNonces, responses);
+
 	public override int GetHashCode()
 	{
 		return HashCode.Combine(PublicNonces, Responses);
